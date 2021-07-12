@@ -4,6 +4,7 @@ import { Text, Alert, FlatList, TouchableOpacity, StyleSheet, View } from 'react
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { formatNumber } from 'react-native-currency-input';
+import { List } from 'react-native-paper';
 import api from '../config/configApi';
 
 
@@ -18,8 +19,8 @@ export default function Home() {
     const navigator = useNavigation();
 
     const [saldo, setSaldo] = useState('');
-    const [valorPagamentos,setValorPagamentos] = useState('');
-    const [valorRecebimentos, setValorRecebimentos] = useState('');   
+    const [valorPagamentos, setValorPagamentos] = useState('');
+    const [valorRecebimentos, setValorRecebimentos] = useState('');
     const [lancamentos, setLacamentos] = useState('');
     const [dateView, setDateView] = useState({
         month,
@@ -31,11 +32,11 @@ export default function Home() {
     var month = dateCurrent.getMonth() + 1;
 
     const prev = async () => {
-        if(dateView.month === 1){
+        if (dateView.month === 1) {
             month = 12;
             year = dateView.year - 1;
-        }else{
-            month= dateView.month - 1;
+        } else {
+            month = dateView.month - 1;
             year = dateView.year;
         }
         setDateView({
@@ -46,10 +47,10 @@ export default function Home() {
     }
 
     const next = async () => {
-        if(dateView.month === 12){
+        if (dateView.month === 12) {
             month = 1;
             year = dateView.year + 1;
-        }else{
+        } else {
             month = dateView.month + 1;
             year = dateView.year;
         }
@@ -117,28 +118,36 @@ export default function Home() {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                
+
                 <View style={styles.contentTitle}>
-                    <Text>Listar informações financeiras</Text>
-                    <TouchableOpacity onPress={() => navigator.navigate('Cadastro')}>
-                        <Text>Cadastrar</Text>
+                    <Text style={styles.titleText}>Listar informações financeiras</Text>
+                    <TouchableOpacity
+                        style={styles.cadastrarButton}
+                        onPress={() => navigator.navigate('Cadastro')}>
+                        <Text style={styles.cadastrarButtonText}>Cadastrar</Text>
                     </TouchableOpacity>
                 </View>
-                
-                <Separator />
+
+
                 <View style={styles.contentButtonDate}>
-                <TouchableOpacity onPress={() => prev()}>
-                    <Text>Anterior</Text>
-                </TouchableOpacity>
-                <Text>{dateView.month + '/' + dateView.year}</Text>
-                <TouchableOpacity onPress={() => next()}>
-                    <Text>Proximo</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.cadastrarButton}
+                        onPress={() => prev()}>
+                        <Text style={styles.cadastrarButtonText}>Anterior</Text>
+                    </TouchableOpacity>
+                    <Text
+                        style={styles.titleText}
+                    >{dateView.month + '/' + dateView.year}</Text>
+                    <TouchableOpacity
+                        style={styles.cadastrarButton}
+                        onPress={() => next()}>
+                        <Text style={styles.cadastrarButtonText}>Proximo</Text>
+                    </TouchableOpacity>
                 </View>
-                <Separator />
-                
-                <View style= {styles.contentSaldo}>
-                    <Text>Valor recebido: {
+
+
+                <View style={styles.contentSaldo}>
+                    <Text style={styles.itemTextSuccess}>Valor recebido: {
                         formatNumber(valorRecebimentos, {
                             separator: ',',
                             prefix: 'R$ ',
@@ -147,7 +156,7 @@ export default function Home() {
                             signPosition: 'beforePrefix',
                         })
                     } </Text>
-                    <Text>Valor pago: {
+                    <Text style={styles.itemTextDanger}>Valor pago: {
                         formatNumber(valorPagamentos, {
                             separator: ',',
                             prefix: 'R$ ',
@@ -156,7 +165,7 @@ export default function Home() {
                             signPosition: 'beforePrefix',
                         })
                     }</Text>
-                    <Text>Saldo: {
+                    <Text style={styles.saldoText}>Saldo: {
                         formatNumber(saldo, {
                             separator: ',',
                             prefix: 'R$ ',
@@ -166,39 +175,44 @@ export default function Home() {
                         })
                     }</Text>
                 </View>
-                <Separator />
-                
-                <FlatList
-                    data={lancamentos}
-                    renderItem={({ item }) => (
-                        <View style={styles.contentFlatlist}>
-                            <Text>{item.id}</Text>
-                            <Text>{item.nome}</Text>
-                            <Text>{
-                                formatNumber(item.valor, {
-                                    separator: ',',
-                                    prefix: 'R$ ',
-                                    precision: 2,
-                                    delimiter: '.',
-                                    signPosition: 'beforePrefix',
-                                })
-                            }
-                            </Text>
-                            {item.tipo === 1 ? <Text>Débito</Text> : <Text>Crédito</Text> }
-                            {item.status === 1 ? <Text>Pendente</Text> : <Text>Efetuado</Text>}
-                            <Text>{moment(item.vencimento).format('DD/MM/YYYY')}</Text>
-                            <View style={styles.contentButton}>
-                                <TouchableNativeFeedback onPress={() => navigator.navigate('Edit', { idLancamento: item.id })} >
-                                    <Text>Editar</Text>
+                <List.AccordionGroup >
+                    <FlatList
+                        style={styles.contentFlatlist}
+                        data={lancamentos}
+                        renderItem={({ item }) => (
+                            <List.Accordion title={item.nome} id={item.id}>
+                                <View style={styles.contentFlatlistItens}>
+                                    <Text style={styles.itemTextSuccess}>{
+                                        formatNumber(item.valor, {
+                                            separator: ',',
+                                            prefix: 'R$ ',
+                                            precision: 2,
+                                            delimiter: '.',
+                                            signPosition: 'beforePrefix',
+                                        })
+                                    }
+                                    </Text>
+                                    {item.tipo === 1 ? <Text style={styles.itemTextDanger}>Débito</Text> : <Text style={styles.itemTextSuccess}>Crédito</Text>}
+                                    {item.status === 1 ? <Text style={styles.itemTextDanger}>Pendente</Text> : <Text style={styles.itemTextSuccess}>Efetuado</Text>}
+                                    <Text style={styles.itemTextSuccess}>{moment(item.vencimento).format('DD/MM/YYYY')}</Text>
+                                </View>
+                                <View style={styles.contentButton}>
+                                    <TouchableNativeFeedback
+                                        style={styles.editarButton}
+                                        onPress={() => navigator.navigate('Edit', { idLancamento: item.id })} >
+                                        <Text style={styles.editarButtonText}>Editar</Text>
 
-                                </TouchableNativeFeedback>
-                                <TouchableNativeFeedback onPress={() => handleDelete(item.id)} >
-                                    <Text>Apagar</Text>
-                                </TouchableNativeFeedback>
-                            </View>
-                        </View>
-                    )}
-                    keyExtractor={lancamento => String(lancamento.id)} />
+                                    </TouchableNativeFeedback>
+                                    <TouchableNativeFeedback
+                                        style={styles.apagarButton}
+                                        onPress={() => handleDelete(item.id)} >
+                                        <Text style={styles.apagarButtonText}>Apagar</Text>
+                                    </TouchableNativeFeedback>
+                                </View>
+                            </List.Accordion>
+                        )}
+                        keyExtractor={lancamento => String(lancamento.id)} />
+                </List.AccordionGroup>
             </View>
         </View>
     );
@@ -222,21 +236,59 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'flex-start',
+        textAlign: 'center',
         justifyContent: 'space-between',
         marginVertical: 4,
         padding: 8,
+        borderWidth: 1,
+        borderRadius: 8,
     },
 
-    contentSaldo:{
-        marginVertical: 4,
+    titleText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1C73B4',
+        
+    },
+
+    contentSaldo: {
+        borderWidth: 1,
+        borderRadius: 8,
         padding: 8,
+        marginVertical: 4,
+    },
+
+    itemTextSuccess: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: "#007744",
+        margin: 4,
+    },
+
+    itemTextDanger: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: "#ff0777",
+        margin: 4,
+    },
+
+    saldoText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: "#1C73B4",
+        margin: 4,
     },
 
     contentFlatlist: {
-        marginTop: 16,
-        padding: 8,
+        marginVertical: 4,
+        padding: 12,
         borderWidth: 1,
         borderRadius: 8,
+    },
+
+    contentFlatlistItens:{
+        paddingHorizontal: 12,
+        paddingVertical: 4,
     },
 
     contentButtonDate: {
@@ -246,6 +298,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginVertical: 4,
         padding: 8,
+        borderWidth: 1,
+        borderRadius: 8,
     },
 
     contentButton: {
@@ -254,11 +308,65 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         justifyContent: 'space-between',
         marginVertical: 4,
+        padding: 8,
+    },
+
+    cadastrarButton: {
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#007744',
+        padding: 4,
+
+    },
+
+    cadastrarButtonText: {
+        color: '#007744',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+
+    editarButton: {
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#ff7700',
+        padding: 4,
+        marginHorizontal: 8,
+
+    },
+
+    editarButtonText: {
+        color: '#ff7700',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+
+    apagarButton: {
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#ff0777',
+        padding: 4,
+        marginHorizontal: 8,
+
+    },
+
+    apagarButtonText: {
+        color: '#ff0777',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
 
     separator: {
         marginVertical: 4,
-        borderBottomColor: '#737373',
+        borderBottomColor: '#1C73B4',
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
 });

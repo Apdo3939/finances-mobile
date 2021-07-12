@@ -146,7 +146,7 @@ export default function Cadastro() {
             </View>
             <Button
                 title="Cadastrar"
-                color="#000077"
+                color="#1C73B4"
                 onPress={handleCreateLancamento}
                 accessibilityLabel="Botão para cadastrar o lançamento."
             />
