@@ -9,21 +9,14 @@ import Edit from './pages/Edit';
 const stack = createStackNavigator();
 
 export default function Routes() {
-
-    const screenOptionsStyle = {
-        headerStyle: {
-            backgroundColor: '#f0f0f0'
-        },
-        headerTinColor: '#0077ff',
-        headerBackTitle: 'Voltar'
-    }
-
     return (
         <NavigationContainer>
             <stack.Navigator
                 screenOptions={
                     {
-                        headerStyle: { backgroundColor: 'papayawhip' },
+                        headerStyle: { 
+                            backgroundColor: 'papayawhip',
+                         },
                         headerTintColor: '#0077ff',
                         headerBackTitle: 'Voltar'
                     }}>

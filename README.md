@@ -29,6 +29,10 @@ Realizar chamada para API
 
 Manipular a data
 ### yarn add moment
+### expo install @react-native-community/datetimepicker
 
 Converter para Real
 ### yarn add react-native-currency-input
+
+material design for react native
+### yarn add react-native-paper

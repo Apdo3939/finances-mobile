@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Text, StyleSheet, TextInput, ScrollView, Button, View } from 'react-native';
+import { Alert, Text, StyleSheet, TextInput, ScrollView, Button, View, Platform } from 'react-native';
 import moment from 'moment';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatNumber } from 'react-native-currency-input';
-
+import { RadioButton } from 'react-native-paper';
 import api from '../config/configApi';
 import { useNavigation } from '@react-navigation/native';
 
@@ -20,6 +21,9 @@ export default function Edit({ route }) {
     const [tipo, setTipo] = useState('');
     const [status, setStatus] = useState('');
     const [vencimento, setVencimento] = useState('');
+    const [date, setDate] = useState();
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
 
     const [valorReal, setValorReal] = useState('');
 
@@ -30,7 +34,7 @@ export default function Edit({ route }) {
         setValorReal(valorInputConvertido);
 
         var valorSalvar = await valorInputConvertido.replace(".", "");
-        valorSalvar = await valorSalvar.replace(",",".");
+        valorSalvar = await valorSalvar.replace(",", ".");
         setValor(valorSalvar);
 
     }
@@ -51,6 +55,7 @@ export default function Edit({ route }) {
             setTipo(res.data.lancamento.tipo);
             setStatus(res.data.lancamento.status);
             setVencimento(res.data.lancamento.vencimento);
+            setDate(new Date(moment(res.data.lancamento.vencimento,"YYYY-MM-DD")));
 
         } catch (error) {
             if (error.res) {
@@ -88,57 +93,110 @@ export default function Edit({ route }) {
             });
     }
 
+    const showMode = currentMode => {
+        setShow(true);
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShow(Platform.OS === 'ios' ? true : false);
+        setDate(currentDate);
+        setVencimento(currentDate);
+    };
+
     useEffect(() => { listarLancamentos(); }, []);
 
     return (
         <ScrollView>
             <View style={styles.container}>
-                <Text>Editar</Text>
-                <Text>Id do lançamento: {id}</Text>
+                <View style={styles.content}>
+                    <View style={styles.contentTitle}>
+                        <Text>Editar</Text>
+                        <Separator />
+                    </View>
 
-                <TextInput
-                    style={styles.input}
-                    value={nome}
-                    onChangeText={text => setNome(text)}
-                    placeholder='Digite o nome do lançamento'
-                />
+                    <View style={styles.contentCardLancamento}>
+                        <Text>Id do lançamento: {id}</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={nome}
+                            onChangeText={text => setNome(text)}
+                            placeholder='Digite o nome do lançamento'
+                        />
 
-                <TextInput
-                    style={styles.input}
-                    value={valorReal}
-                    onChangeText={text => handleConvertValor(text)}
-                    placeholder='Digite o valor do lançamento'
-                />
+                        <TextInput
+                            style={styles.input}
+                            value={valorReal}
+                            onChangeText={text => handleConvertValor(text)}
+                            placeholder='Digite o valor do lançamento'
+                        />
 
-                <TextInput
-                    style={styles.input}
-                    value={tipo}
-                    onChangeText={text => setTipo(text)}
-                    placeholder='Digite o tipo do lançamento'
-                />
+                        <View>
+                            <Button
+                                title={moment(date).format("DD/MM/YYYY")}
+                                onPress={showDatepicker}
+                                color="#1C73B4"
+                                accessibilityLabel="Botão para editar o vencimento."
+                            />
+                            {show && (
+                                <DateTimePicker
+                                    testID="dateTimePicker"
+                                    timeZoneOffsetInMinutes={0}
+                                    value={date}
+                                    mode={mode}
+                                    is24Hour={true}
+                                    display="default"
+                                    onChange={onChange}
+                                />
+                            )}
+                        </View>
 
-                <TextInput
-                    style={styles.input}
-                    value={status}
-                    onChangeText={text => setStatus(text)}
-                    placeholder='Digite o status do lançamento'
-                />
+                        <View style={styles.radioButton}>
+                            <Text style={styles.textRadioButton}>Tipo</Text>
+                            <RadioButton
+                                value="1"
+                                status={tipo === 1 ? 'checked' : 'unchecked'}
+                                onPress={() => setTipo(1)}
+                            />
+                            <Text style={styles.textRadioButton}>Débito</Text>
+                            <RadioButton
+                                value="2"
+                                status={tipo === 2 ? 'checked' : 'unchecked'}
+                                onPress={() => setTipo(2)}
+                            />
+                            <Text style={styles.textRadioButton}>Crédito</Text>
+                        </View>
 
-                <TextInput
-                    style={styles.input}
-                    value={vencimento}
-                    onChangeText={text => setVencimento(text)}
-                    placeholder='Digite o vencimento do lançamento'
-                />
-                <View>
-                    <Button
-                        title="Editar"
-                        onPress={handleEdit}
-                        accessibilityLabel="Botão para editar o lançamento."
-                    />
+                        <View style={styles.radioButton}>
+                            <Text style={styles.textRadioButton}>Status</Text>
+                            <RadioButton
+                                value="1"
+                                status={status === 1 ? 'checked' : 'unchecked'}
+                                onPress={() => setStatus(1)}
+                            />
+                            <Text style={styles.textRadioButton}>Pendente</Text>
+
+                            <RadioButton
+                                value="2"
+                                status={status === 2 ? 'checked' : 'unchecked'}
+                                onPress={() => setStatus(2)}
+                            />
+                            <Text style={styles.textRadioButton}>Efetuado</Text>
+                        </View>
+                        <View>
+                            <Button
+                                title="Editar"
+                                onPress={handleEdit}
+                                accessibilityLabel="Botão para editar o lançamento."
+                            />
+                        </View>
+                    </View>
                 </View>
-                <Separator />
-
             </View>
         </ScrollView>
     );
@@ -151,6 +209,32 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginHorizontal: 16,
     },
+
+    content: {
+        display: 'flex',
+        padding: 8,
+        margin: 8,
+        borderWidth: 1,
+        borderRadius: 8,
+    },
+
+    contentTitle: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginHorizontal: 8,
+        marginVertical: 16,
+    },
+
+    contentCardLancamento: {
+        display: 'flex',
+        padding: 8,
+        margin: 8,
+        borderWidth: 1,
+        borderRadius: 8,
+        marginVertical: 16,
+    },
+
     input: {
         height: 40,
         padding: 8,
@@ -159,8 +243,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 
+    radioButton: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignContent: 'center',
+    },
+
+    textRadioButton: {
+        width: 60,
+        textAlign: 'left',
+    },
+
     separator: {
-        margin: 8,
+        marginVertical: 8,
         borderBottomColor: '#737373',
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
